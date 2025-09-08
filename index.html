@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spanish Alphabet - True or False</title>
+<style>
+  body { font-family: Arial, sans-serif; background:#f0f4ff; margin:20px; }
+  h1 { text-align:center; color:#1E3A8A; }
+  #instructions { text-align:center; margin-bottom:15px; font-size:15px; color:#334155; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px,1fr)); gap:16px; }
+  .section { background:#fff; padding:15px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,.1); text-align:center; }
+  .section h2 { margin:0 0 10px; font-size:18px; color:#1E3A8A; }
+  .question { margin:8px 0; font-size:16px; font-weight:bold; }
+  .buttons { display:flex; justify-content:center; gap:10px; margin-top:10px; }
+  button.choice { 
+    padding:8px 14px; 
+    border:none; 
+    border-radius:6px; 
+    cursor:pointer; 
+    font-weight:bold; 
+    background:#03a9f4; /* azul celeste */
+    color:white; 
+    transition:background 0.3s;
+  }
+  button.choice:disabled { opacity:0.7; cursor:not-allowed; }
+  button.correct { background:#4caf50 !important; } /* verde */
+  button.wrong { background:#f44336 !important; }   /* rojo */
+  footer { text-align:center; margin-top:20px; }
+  #restart { background:#f44336; color:#fff; border:none; padding:10px 16px; border-radius:8px; cursor:pointer; font-weight:bold; }
+  #score { text-align:center; margin:15px; font-size:18px; font-weight:bold; color:#1E3A8A; }
+  #message { text-align:center; font-size:18px; font-weight:bold; margin-top:10px; color:#1E3A8A; }
+</style>
+</head>
+<body>
+<h1>Spanish Alphabet — True or False (20)</h1>
+<div id="instructions">
+  Instructions: Read each letter and pronunciation. Select "True" if they match, or "False" if they do not.
+</div>
+<div id="score">Score: 0 / 20</div>
+<div class="grid" id="quiz"></div>
+<div id="message"></div>
+
+<footer>
+  <button id="restart">🔄 Restart</button>
+</footer>
+
+<script>
+const data = [
+  {letter:"A",pron:"ah"},
+  {letter:"B",pron:"beh"},
+  {letter:"C",pron:"seh"},
+  {letter:"D",pron:"deh"},
+  {letter:"E",pron:"eh"},
+  {letter:"F",pron:"eh-feh"},
+  {letter:"G",pron:"heh"},
+  {letter:"H",pron:"ah-cheh"},
+  {letter:"I",pron:"ee"},
+  {letter:"J",pron:"ho-tah"},
+  {letter:"K",pron:"kah"},
+  {letter:"L",pron:"eh-leh"},
+  {letter:"M",pron:"eh-meh"},
+  {letter:"N",pron:"eh-neh"},
+  {letter:"Ñ",pron:"eh-nyeh"},
+  {letter:"O",pron:"oh"},
+  {letter:"P",pron:"peh"},
+  {letter:"Q",pron:"koo"},
+  {letter:"R",pron:"eh-reh"},
+  {letter:"S",pron:"eh-seh"},
+  {letter:"T",pron:"teh"},
+  {letter:"U",pron:"oo"},
+  {letter:"V",pron:"oo-veh"},
+  {letter:"W",pron:"oo-veh doble"},
+  {letter:"X",pron:"eh-kees"},
+  {letter:"Y",pron:"ee gree-eh-gah"},
+  {letter:"Z",pron:"seh-tah"}
+];
+
+let score=0;
+let answered=0;
+
+function newSet(){
+  score=0;
+  answered=0;
+  document.getElementById("score").textContent=`Score: 0 / 20`;
+  document.getElementById("message").textContent="";
+  const shuffled=[...data].sort(()=>0.5-Math.random());
+  const selected=shuffled.slice(0,20);
+  const container=document.getElementById("quiz");
+  container.innerHTML="";
+
+  selected.forEach((item,i)=>{
+    let shownPron;
+    let isTrue=Math.random()>0.5;
+    if(isTrue){
+      shownPron=item.pron;
+    } else {
+      const wrong=[...data].filter(d=>d.letter!==item.letter);
+      shownPron=wrong[Math.floor(Math.random()*wrong.length)].pron;
+    }
+
+    const section=document.createElement("section");
+    section.className="section";
+    section.innerHTML=`
+      <h2>${i+1}</h2>
+      <p class="question">Letter: <b>${item.letter}</b><br>Pronunciation: <i>${shownPron}</i></p>
+      <div class="buttons">
+        <button class="choice">True</button>
+        <button class="choice">False</button>
+      </div>
+    `;
+    container.appendChild(section);
+
+    const [trueBtn,falseBtn]=section.querySelectorAll("button.choice");
+
+    trueBtn.addEventListener("click",()=>{
+      if(isTrue){ 
+        trueBtn.classList.add("correct");
+        score++;
+      } else { 
+        trueBtn.classList.add("wrong");
+      }
+      lock(trueBtn,falseBtn);
+    });
+
+    falseBtn.addEventListener("click",()=>{
+      if(!isTrue){ 
+        falseBtn.classList.add("correct");
+        score++;
+      } else { 
+        falseBtn.classList.add("wrong");
+      }
+      lock(falseBtn,trueBtn);
+    });
+  });
+}
+
+function lock(clicked,other){
+  clicked.disabled=true;
+  other.disabled=true;
+  answered++;
+  document.getElementById("score").textContent=`Score: ${score} / 20`;
+  if(answered===20){
+    showMessage();
+  }
+}
+
+function showMessage(){
+  const msg=document.getElementById("message");
+  if(score>=18){
+    msg.textContent="🌟 Excellent! You really know the alphabet!";
+  } else if(score>=14){
+    msg.textContent="👍 Good job! Keep practicing to get perfect.";
+  } else if(score>=10){
+    msg.textContent="🙂 Not bad! Review and try again.";
+  } else {
+    msg.textContent="💪 Keep practicing, you can do better!";
+  }
+}
+
+document.getElementById("restart").addEventListener("click",newSet);
+
+newSet();
+</script>
+</body>
+</html>
